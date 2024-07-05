@@ -1,8 +1,8 @@
-Prerequisites:
+**Prerequisites:**
 
   First, make sure you have installed Docker Desktop and Visual Studio.
 
-Install Apache Airflow with Docker:
+**Install Apache Airflow with Docker:**
 
   Create a folder materials in your Documents
   
