@@ -303,9 +303,10 @@ Steps to Set Up Multi-Node Architecture with Celery
 5. **Set Up Monitoring and Management Tools**:
    - Use tools like Flower to monitor Celery workers.
    - Ensure logs and task states are appropriately stored and accessible.
-
 In summary, a multi-node architecture with Celery in Airflow distributes the workload across multiple machines, enhancing scalability, fault tolerance, and performance. This setup is more complex but essential for large-scale and production environments.
+
 ======================================================================================================================================================================================
+
 **WORK FLOW**
 Overview
 
