@@ -95,6 +95,7 @@ By leveraging Apache Airflow, organizations can streamline their workflow manage
 
 
 ======================================================================================================================================================================================
+**AirFlow Drawbacks:**
 
 1. **Airflow is not a data streaming solution**:
    - **What it means**: Airflow is not designed to handle data that needs to be processed in real-time or near real-time.
@@ -112,7 +113,7 @@ In summary, Airflow is best used as a workflow orchestrator to manage and schedu
 
 ======================================================================================================================================================================================
 
-Single Node Architecture in Airflow
+**Single Node Architecture in Airflow**
 
 In a single node setup, all components of Apache Airflow run on a single machine. This includes the scheduler, web server, metadata database, and worker(s). Here’s a breakdown of each component and how they interact in a single node environment:
 
@@ -174,16 +175,16 @@ Limitations of Single Node Architecture
 3. **Performance**:
    - Limited by the hardware resources of the single node (CPU, memory, disk I/O).
 
-Use Cases
+**Use Cases**
 
 - **Development and Testing**: Great for local development and testing of DAGs before deploying to a production environment.
 - **Small Projects**: Suitable for small projects with light workloads that don’t require high availability or scalability.
 
 In summary, single node architecture in Airflow is a straightforward setup where all components run on a single machine, making it simple to manage but limited in terms of scalability and fault tolerance.
 
-==========================================================================================================================================================================================================================
+======================================================================================================================================================================================
 
-Multi-Node Architecture with Celery in Airflow
+**Multi-Node Architecture with Celery in Airflow**
 
 In a multi-node setup, different components of Apache Airflow are distributed across multiple machines. This setup leverages Celery for task execution, allowing for better scalability and fault tolerance. Here’s a detailed look at how this architecture works:
 
@@ -304,4 +305,115 @@ Steps to Set Up Multi-Node Architecture with Celery
    - Ensure logs and task states are appropriately stored and accessible.
 
 In summary, a multi-node architecture with Celery in Airflow distributes the workload across multiple machines, enhancing scalability, fault tolerance, and performance. This setup is more complex but essential for large-scale and production environments.
+======================================================================================================================================================================================
+**WORK FLOW**
+Overview
 
+The text explains the lifecycle of a DAG (Directed Acyclic Graph) and its tasks in Apache Airflow, highlighting key steps and states that are crucial for debugging. 
+
+Steps in the Lifecycle of a DAG
+
+1. **Creating a DAG**:
+   - You create a new DAG by writing a Python script (e.g., `dag.py`).
+   - This script is placed in the `dags` folder, which is monitored by Airflow.
+
+2. **Scheduler Detection**:
+   - The Scheduler parses the `dags` folder every five minutes (default interval) to detect new DAGs.
+   - It might take up to five minutes for a new DAG to appear in the Airflow UI.
+
+3. **Modifying a DAG**:
+   - When you modify an existing DAG, the Scheduler parses the folder every 30 seconds to detect changes.
+   - It might take up to 30 seconds for modifications to be reflected.
+
+4. **Running a DAG**:
+   - The Scheduler creates a `DAG Run` object with the state `Running` when it starts executing a DAG.
+   - The Scheduler then creates task instances for each task in the DAG.
+
+Task Lifecycle and States
+
+1. **Task Instance Creation**:
+   - For each task in the DAG, a `task instance` object is created.
+   - Initial state of the task instance is `None`.
+
+2. **Task Scheduling**:
+   - The task instance state changes to `Scheduled` once it's ready to be picked up for execution.
+
+3. **Task Queuing**:
+   - The Scheduler sends the `task instance` object to the Executor’s queue.
+   - The state of the task instance changes to `Queued`.
+
+4. **Task Execution**:
+   - The Executor creates a subprocess to run the task.
+   - The state of the task instance changes to `Running`.
+
+5. **Task Completion**:
+   - Upon completion, the task instance state changes to `Success` or `Failed` based on the outcome.
+
+6. **DAG Completion**:
+   - The Scheduler checks if all tasks in the DAG have been executed.
+   - If all tasks are completed, the `DAG Run` state changes to `Success`.
+
+Monitoring and Debugging
+
+- **Airflow UI**: 
+  - You can monitor the states of both the DAG Run and individual task instances in the Airflow UI.
+  - The UI will reflect the states as `None`, `Scheduled`, `Queued`, `Running`, `Success`, or `Failed`.
+
+Summary of Key Points
+
+- **Scheduler Detection Intervals**: New DAGs are detected every five minutes, and modifications to existing DAGs are detected every 30 seconds.
+- **State Transitions**:
+  - **DAG Run States**: `Running`, `Success`, or `Failed`.
+  - **Task Instance States**: `None`, `Scheduled`, `Queued`, `Running`, `Success`, or `Failed`.
+- **Execution Flow**: 
+  - The Scheduler schedules tasks and places them in the Executor's queue.
+  - The Executor runs tasks as subprocesses.
+  - Task and DAG states are updated and can be monitored via the Airflow UI.
+
+Diagram of the Process
+
+Here’s a simplified diagram to visualize the process:
+
+```
++-------------------+
+| Create DAG (dag.py)|
++-------------------+
+         |
++-------------------+
+| Place in dags/ folder|
++-------------------+
+         |
++-------------------+
+| Scheduler detects DAG|
++-------------------+
+         |
++-----------------------+
+| Scheduler creates DAG Run|
++-----------------------+
+         |
++---------------------+
+| Create Task Instances  |
++---------------------+
+         |
++--------------------+
+| Schedule Tasks       |
++--------------------+
+         |
++--------------------+
+| Queue Tasks           |
++--------------------+
+         |
++--------------------+
+| Run Tasks (Executor)  |
++--------------------+
+         |
++---------------------+
+| Task Completion (Success/Failed)|
++---------------------+
+         |
++--------------------+
+| DAG Run Completion  |
++--------------------+
+```
+
+In summary, understanding these steps and states helps in debugging tasks and data pipelines in Apache Airflow by providing clear checkpoints to monitor and identify issues.
