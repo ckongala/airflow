@@ -184,56 +184,124 @@ In summary, single node architecture in Airflow is a straightforward setup where
 ==========================================================================================================================================================================================================================
 
 Multi-Node Architecture with Celery in Airflow
+
 In a multi-node setup, different components of Apache Airflow are distributed across multiple machines. This setup leverages Celery for task execution, allowing for better scalability and fault tolerance. Here’s a detailed look at how this architecture works:
 
 Components in a Multi-Node Setup
-Scheduler:
-  The scheduler reads DAGs and schedules tasks for execution.
-  It runs on a separate machine or multiple machines for high availability.
-Web Server:
-  The web server provides the user interface for interacting with Airflow.
-  It also runs on a separate machine or multiple machines for load balancing and high availability.
-Metadata Database:
-  This central database stores the state and configuration of the Airflow environment.
-  It runs on a dedicated database server or a managed database service.
-Celery Workers:
-  Celery workers are responsible for executing the tasks scheduled by the scheduler.
-  Multiple worker nodes can be deployed to distribute the workload.
-Celery Broker:
-  The broker is the messaging system that mediates between the scheduler and the workers.
-  Common choices include RabbitMQ and Redis.
-Result Backend:
-  The result backend is used to store the results of the task executions.
-  It can be the same as the metadata database or a different storage system.
-  How It Works in a Multi-Node Setup
-DAG Definition:
-  DAGs are defined and placed in a shared storage location accessible by all Airflow components.
-Scheduling:
-  The scheduler reads the DAG files and schedules tasks.
-  Tasks are placed in a queue managed by the Celery broker.
-Task Execution:
-  Celery workers pick up tasks from the broker and execute them.
-  Tasks are executed on different worker nodes, distributing the load.
-Result Storage:
-  Results of task executions are stored in the result backend.
-Monitoring and Management:
-  The web server allows users to monitor and manage DAGs and tasks.
-  Users can view the status, logs, and other details through the web interface.
+
+1. **Scheduler**:
+   - The scheduler reads DAGs and schedules tasks for execution.
+   - It runs on a separate machine or multiple machines for high availability.
+
+2. **Web Server**:
+   - The web server provides the user interface for interacting with Airflow.
+   - It also runs on a separate machine or multiple machines for load balancing and high availability.
+
+3. **Metadata Database**:
+   - This central database stores the state and configuration of the Airflow environment.
+   - It runs on a dedicated database server or a managed database service.
+
+4. **Celery Workers**:
+   - Celery workers are responsible for executing the tasks scheduled by the scheduler.
+   - Multiple worker nodes can be deployed to distribute the workload.
+
+5. **Celery Broker**:
+   - The broker is the messaging system that mediates between the scheduler and the workers.
+   - Common choices include RabbitMQ and Redis.
+
+6. **Result Backend**:
+   - The result backend is used to store the results of the task executions.
+   - It can be the same as the metadata database or a different storage system.
+
+How It Works in a Multi-Node Setup
+
+1. **DAG Definition**:
+   - DAGs are defined and placed in a shared storage location accessible by all Airflow components.
+
+2. **Scheduling**:
+   - The scheduler reads the DAG files and schedules tasks.
+   - Tasks are placed in a queue managed by the Celery broker.
+
+3. **Task Execution**:
+   - Celery workers pick up tasks from the broker and execute them.
+   - Tasks are executed on different worker nodes, distributing the load.
+
+4. **Result Storage**:
+   - Results of task executions are stored in the result backend.
+
+5. **Monitoring and Management**:
+   - The web server allows users to monitor and manage DAGs and tasks.
+   - Users can view the status, logs, and other details through the web interface.
+
 Benefits of Multi-Node Architecture
-Scalability:
-  Easy to scale by adding more worker nodes to handle increased workload.
-Fault Tolerance:
-  The failure of a single node doesn’t bring down the entire system.
-  Redundancy can be added to the scheduler, web server, and worker nodes.
-Performance:
-  Distributing tasks across multiple workers improves performance and reduces the load on individual nodes.
+
+1. **Scalability**:
+   - Easy to scale by adding more worker nodes to handle increased workload.
+
+2. **Fault Tolerance**:
+   - The failure of a single node doesn’t bring down the entire system.
+   - Redundancy can be added to the scheduler, web server, and worker nodes.
+
+3. **Performance**:
+   - Distributing tasks across multiple workers improves performance and reduces the load on individual nodes.
+
 Limitations of Multi-Node Architecture
-Complexity:
-  More complex to set up and manage compared to a single node setup.
-  Requires configuring and maintaining multiple components.
-Resource Management:
-  Effective resource management is required to ensure all components perform optimally.
+
+1. **Complexity**:
+   - More complex to set up and manage compared to a single node setup.
+   - Requires configuring and maintaining multiple components.
+
+2. **Resource Management**:
+   - Effective resource management is required to ensure all components perform optimally.
+
 Use Cases
-  Large-Scale Deployments: Ideal for production environments with high workloads and the need for scalability.
-  High Availability Requirements: Suitable for use cases where uptime and reliability are critical.
+
+- **Large-Scale Deployments**: Ideal for production environments with high workloads and the need for scalability.
+- **High Availability Requirements**: Suitable for use cases where uptime and reliability are critical.
+
+Example Architecture Diagram
+
+Here's a simplified diagram of a multi-node setup using Celery:
+
+```
+      +-------------------+
+      | Metadata Database |
+      +-------------------+
+               |
+      +--------+--------+
+      |                 |
++-----+-----+     +-----+-----+
+| Scheduler |     | Web Server |
++-----------+     +-----------+
+      |                 |
++-----+-----------------+-----+
+|           Celery Broker       |
++-------------------------------+
+      |                 |
++-----+-----+     +-----+-----+
+| Celery     |     | Celery     |
+| Worker     |     | Worker     |
++-----------+     +-----------+
+```
+
+Steps to Set Up Multi-Node Architecture with Celery
+
+1. **Install Celery and a Broker**:
+   - Install Celery and a message broker like RabbitMQ or Redis.
+
+2. **Configure Airflow to Use Celery**:
+   - Update the `airflow.cfg` file to set the executor to `CeleryExecutor`.
+   - Configure the broker URL and result backend.
+
+3. **Deploy Scheduler and Web Server**:
+   - Deploy the scheduler and web server on separate machines.
+
+4. **Deploy Celery Workers**:
+   - Start Celery workers on multiple machines to handle task execution.
+
+5. **Set Up Monitoring and Management Tools**:
+   - Use tools like Flower to monitor Celery workers.
+   - Ensure logs and task states are appropriately stored and accessible.
+
+In summary, a multi-node architecture with Celery in Airflow distributes the workload across multiple machines, enhancing scalability, fault tolerance, and performance. This setup is more complex but essential for large-scale and production environments.
 
